@@ -62,4 +62,3 @@ resource "aws_amplify_branch" "feature" {
   branch_name = "static-web"
   stage     = "PULL_REQUEST"
 }
-
