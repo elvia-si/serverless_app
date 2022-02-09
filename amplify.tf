@@ -1,6 +1,6 @@
 resource "aws_amplify_app" "my_web_app" {
-  name       = "my-first-serverless-app"
-  repository = "https://github.com/elvia-si/serverless_app"
+  name         = "my-first-serverless-app"
+  repository   = "https://github.com/elvia-si/serverless_app"
   access_token = var.access_token
 
   # The default build_spec added by the Amplify Console for React.
@@ -28,11 +28,11 @@ resource "aws_amplify_app" "my_web_app" {
     target = "/index.html"
   }
 
-#   environment_variables = {
-#     ENV = "test"
-#   }
+  #   environment_variables = {
+  #     ENV = "test"
+  #   }
 
-   enable_auto_branch_creation = true
+  enable_auto_branch_creation = true
 
   # The default patterns added by the Amplify Console.
   auto_branch_creation_patterns = [
@@ -49,16 +49,16 @@ resource "aws_amplify_app" "my_web_app" {
 resource "aws_amplify_branch" "development" {
   app_id      = aws_amplify_app.my_web_app.id
   branch_name = "development"
-  stage     = "DEVELOPMENT"
+  stage       = "DEVELOPMENT"
 }
 resource "aws_amplify_branch" "main" {
   app_id      = aws_amplify_app.my_web_app.id
   branch_name = "main"
-  stage     = "PRODUCTION"
+  stage       = "PRODUCTION"
 }
 
 resource "aws_amplify_branch" "feature" {
   app_id      = aws_amplify_app.my_web_app.id
   branch_name = "static-web"
-  stage     = "BETA"
+  stage       = "BETA"
 }
