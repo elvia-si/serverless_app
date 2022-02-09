@@ -60,6 +60,5 @@ resource "aws_amplify_branch" "main" {
 resource "aws_amplify_branch" "feature" {
   app_id      = aws_amplify_app.my_web_app.id
   branch_name = "static-web"
-  stage     = "PULL_REQUEST"
+  stage     = "BETA"
 }
-
