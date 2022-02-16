@@ -3,6 +3,7 @@ resource "aws_api_gateway_rest_api" "wild_rydes" {
   description = "API Gateway for serveless app"
 }
 
+#Authorizer
 resource "aws_api_gateway_authorizer" "cognito_authorizer" {
   name          = "WildRydes"
   type          = "COGNITO_USER_POOLS"
@@ -88,7 +89,9 @@ resource "aws_api_gateway_method_response" "lambda_method_response_200" {
   http_method = aws_api_gateway_method.lambda_post_method.http_method
   status_code = "200"
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = true
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Origin"  = true
   }
   depends_on = [
     aws_api_gateway_method.lambda_post_method
@@ -105,9 +108,29 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   uri                     = aws_lambda_function.request_rides.invoke_arn
 }
 
+resource "aws_api_gateway_integration_response" "lambda_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.wild_rydes.id
+  resource_id = aws_api_gateway_resource.ride.id
+  http_method = aws_api_gateway_method.lambda_post_method.http_method
+  status_code = aws_api_gateway_method_response.lambda_method_response_200.status_code
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+  depends_on = [
+    aws_api_gateway_integration.lambda_integration,
+    aws_api_gateway_method_response.lambda_method_response_200
+  ]
+}
+
 resource "aws_api_gateway_deployment" "rides_deployment" {
   rest_api_id = aws_api_gateway_rest_api.wild_rydes.id
   stage_name  = "BETA"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   depends_on = [
     aws_api_gateway_integration.lambda_integration
