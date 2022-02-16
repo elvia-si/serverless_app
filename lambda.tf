@@ -48,7 +48,7 @@ resource "aws_iam_policy" "lambda_wildrides_policy" {
           "dynamodb:PutItem"
         ],
         "Effect" : "Allow",
-        "Resource" : "arn:aws:dynamodb:eu-west-1:802713609819:table/Rides"
+        "Resource" : "arn:aws:dynamodb:*:*:table/Rides"
       }
     ]
   })
@@ -74,5 +74,14 @@ resource "aws_lambda_function" "request_rides" {
   role             = aws_iam_role.iam_for_lambda_wildrides.arn
   handler          = "requestUnicorn.handler"
   runtime          = "nodejs14.x"
+}
+
+#Allowing API Gateway to Access Lambda
+resource "aws_lambda_permission" "apigw_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "requestUnicorn"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.wild_rydes.execution_arn}/*/*/*"
 }
 

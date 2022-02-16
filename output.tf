@@ -10,3 +10,9 @@ output "Rides_ARN" {
   value = aws_dynamodb_table.rides_table.arn
 }
 
+output "invokeUrl" {
+  description = "Deployment invoke url"
+  value       = aws_api_gateway_deployment.rides_deployment.invoke_url
+}
+
+
