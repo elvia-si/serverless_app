@@ -34,9 +34,7 @@ resource "aws_api_gateway_method_response" "cors_response" {
   resource_id = aws_api_gateway_resource.ride.id
   http_method = aws_api_gateway_method.enable_cors.http_method
   status_code = "200"
-  response_models = {
-    "application/json" = "Empty"
-  }
+  
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = true,
     "method.response.header.Access-Control-Allow-Methods" = true,
@@ -48,10 +46,19 @@ resource "aws_api_gateway_method_response" "cors_response" {
 }
 
 resource "aws_api_gateway_integration" "cors_integration" {
-  rest_api_id          = aws_api_gateway_rest_api.wild_rydes.id
-  resource_id          = aws_api_gateway_resource.ride.id
-  http_method          = aws_api_gateway_method.enable_cors.http_method
-  type                 = "MOCK"
+  rest_api_id = aws_api_gateway_rest_api.wild_rydes.id
+  resource_id = aws_api_gateway_resource.ride.id
+  http_method = aws_api_gateway_method.enable_cors.http_method
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = jsonencode(
+      {
+        statusCode = 200
+      }
+    )
+  }
+
   passthrough_behavior = "WHEN_NO_MATCH"
   depends_on = [
     aws_api_gateway_method.enable_cors
