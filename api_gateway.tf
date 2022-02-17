@@ -29,7 +29,7 @@ resource "aws_api_gateway_method" "enable_cors" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_method_response" "cors_200" {
+resource "aws_api_gateway_method_response" "cors_response" {
   rest_api_id = aws_api_gateway_rest_api.wild_rydes.id
   resource_id = aws_api_gateway_resource.ride.id
   http_method = aws_api_gateway_method.enable_cors.http_method
@@ -48,11 +48,11 @@ resource "aws_api_gateway_method_response" "cors_200" {
 }
 
 resource "aws_api_gateway_integration" "cors_integration" {
-  rest_api_id = aws_api_gateway_rest_api.wild_rydes.id
-  resource_id = aws_api_gateway_resource.ride.id
-  http_method = aws_api_gateway_method.enable_cors.http_method
-  type        = "MOCK"
-
+  rest_api_id          = aws_api_gateway_rest_api.wild_rydes.id
+  resource_id          = aws_api_gateway_resource.ride.id
+  http_method          = aws_api_gateway_method.enable_cors.http_method
+  type                 = "MOCK"
+  passthrough_behavior = "WHEN_NO_MATCH"
   depends_on = [
     aws_api_gateway_method.enable_cors
   ]
@@ -62,7 +62,7 @@ resource "aws_api_gateway_integration_response" "cors_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.wild_rydes.id
   resource_id = aws_api_gateway_resource.ride.id
   http_method = aws_api_gateway_method.enable_cors.http_method
-  status_code = aws_api_gateway_method_response.cors_200.status_code
+  status_code = aws_api_gateway_method_response.cors_response.status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
@@ -70,7 +70,7 @@ resource "aws_api_gateway_integration_response" "cors_integration_response" {
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
   depends_on = [
-    aws_api_gateway_method_response.cors_200
+    aws_api_gateway_method_response.cors_response
   ]
 }
 
@@ -108,25 +108,9 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   uri                     = aws_lambda_function.request_rides.invoke_arn
 }
 
-resource "aws_api_gateway_integration_response" "lambda_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.wild_rydes.id
-  resource_id = aws_api_gateway_resource.ride.id
-  http_method = aws_api_gateway_method.lambda_post_method.http_method
-  status_code = aws_api_gateway_method_response.lambda_method_response_200.status_code
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-  }
-  depends_on = [
-    aws_api_gateway_integration.lambda_integration,
-    aws_api_gateway_method_response.lambda_method_response_200
-  ]
-}
-
 resource "aws_api_gateway_deployment" "rides_deployment" {
   rest_api_id = aws_api_gateway_rest_api.wild_rydes.id
-  stage_name  = "BETA"
+  stage_name  = "test"
 
   lifecycle {
     create_before_destroy = true
@@ -136,8 +120,6 @@ resource "aws_api_gateway_deployment" "rides_deployment" {
     aws_api_gateway_integration.lambda_integration
   ]
 }
-
-
 
 
 
